@@ -1,11 +1,10 @@
-const express = require('express');
+const server = require('./src/server');
+const { conn } = require('./src/db.js');
 
 const { PORT_APP } = process.env;
 
-const server = express();
-
-server.use('/', (req, res) => res.send('Estoy en la ruta GET /'))
-
-server.listen(PORT_APP, () => {
-    console.log(`Server running on port ${PORT_APP}`);
-})
+conn.sync({ alter: true }).then(() => {
+    server.listen(PORT_APP, () => {
+      console.log(`Server listening at ${PORT_APP}`);
+    });
+  });

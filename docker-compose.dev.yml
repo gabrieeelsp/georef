@@ -7,7 +7,42 @@ services:
             - ${PORT_EXT_DEV}:${PORT_APP_DEV}
         environment:
             - PORT_APP=${PORT_APP_DEV}
+            - DB_USER=${DB_USER}
+            - DB_PASSWORD=${DB_PASSWORD}
+            - DB_NAME=${DB_NAME}
+            - DB_HOST=db
+            - DB_PORT=${DB_PORT}
         volumes:
             - ./:/app
+        depends_on:
+            db:
+                condition: service_healthy
         command: sh -c "npm install && npm run dev"
+    
+    db:
+        #container_name: db
+        image: postgres:16.1-bullseye
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        #ports:
+        #    - "${DB_PORT}:5432"
+        environment:
+            - POSTGRES_DB=${DB_NAME}
+            - POSTGRES_USER=${DB_USER}
+            - POSTGRES_PASSWORD=${DB_PASSWORD}
+        volumes:
+            - ./data:/var/lib/postgresql/data
   
+    pgadmin:
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: 'dev@gmail.com'
+            PGADMIN_DEFAULT_PASSWORD: '12345'
+        ports:
+            - ${PGADMIN_PORT_EXT_DEV}:80
+        depends_on:
+            db:
+                condition: service_healthy
