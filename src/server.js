@@ -1,7 +1,9 @@
 const express = require('express');
+const morgan = require('morgan');
+const router = require('./routes');
 
 const server = express();
-
-server.use('/', (req, res) => res.send('Estoy en la ruta GET /'))
+server.use(morgan('dev'));
+server.use('/', router);
 
 module.exports = server;
