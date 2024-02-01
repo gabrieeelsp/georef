@@ -1,8 +1,8 @@
 services:
     app:
-        build: 
+        build:
             dockerfile: Dockerfile.prod
-        image: node-app_prod
+        image: georef-app_prod
         ports:
             - ${PORT_EXT_PROD}:${PORT_APP_PROD}
         environment:
@@ -17,14 +17,15 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+       # command: sh -c "node index.js"
         networks:
             example_network_prod:
-    
+
     db:
         #container_name: db
         image: postgres:16.1-bullseye
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+            test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
             interval: 10s
             timeout: 5s
             retries: 5
@@ -38,7 +39,7 @@ services:
             - ./data_prod:/var/lib/postgresql/data
         networks:
             example_network_prod:
-  
+
     pgadmin:
         image: dpage/pgadmin4
         environment:
@@ -55,6 +56,6 @@ services:
             example_network_prod:
 volumes:
     pgadmin-data_prod:
-    
+
 networks:
     example_network_prod:
