@@ -1,13 +1,13 @@
 const { Router } = require('express');
 const {
-    getAll,
-    getOneByNombre,
-} = require('../controllers/provinciaController');
+    getAllHandler,
+    getOneByIdHandler,
+} = require('../handlers/provinciaHandler');
 
 const provinciaRouter = Router();
 
-provinciaRouter.get('/', (req, res) => getAll(req, res));
+provinciaRouter.get('/', getAllHandler);
 
-provinciaRouter.get('/:name', (req, res) => getOneByNombre(req, res));
+provinciaRouter.get('/:id', getOneByIdHandler);
 
 module.exports = provinciaRouter;

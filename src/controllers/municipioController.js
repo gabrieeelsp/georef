@@ -1,123 +1,53 @@
-const Sequelize = require('sequelize');
-const load = require('../load_db');
-const { Provincia, Municipio } = require('../db');
+const { Sequelize } = require('sequelize');
+// const load = require('sequelize');
+const { Municipio } = require('../db');
 
-const getAll = async (req, res) => {
-    if ((await Municipio.count()) === 0) {
-        await load();
-    }
+const getFiltersList = (filters) => {
+    const filtersList = {};
 
-    const name = req.query.name ? req.query.name : '';
-    const provinciaId = req.query.provincia_id
-        ? Number(req.query.provincia_id)
-        : null;
-
-    if (!name && !provinciaId) {
-        const items = await Municipio.findAll({
-            attributes: ['id', 'name'],
-            include: [
-                {
-                    model: Provincia,
-                },
-            ],
-            order: [['name', 'ASC']],
-        });
-
-        res.status(200).json(items);
-    }
-
-    if (!name && provinciaId) {
-        const items = await Municipio.findAll({
-            where: {
-                ProvinciumId: provinciaId,
-            },
-            attributes: ['id', 'name'],
-            include: [
-                {
-                    model: Provincia,
-                },
-            ],
-            order: [['name', 'ASC']],
-        });
-
-        res.status(200).json(items);
-    }
-
-    if (name && !provinciaId) {
-        const items = await Municipio.findAll({
-            where: Sequelize.where(
-                Sequelize.fn(
-                    'unaccent',
-                    Sequelize.fn('lower', Sequelize.col('Municipio.name')),
-                ),
-                'like',
-                `%${name.toLowerCase()}%`,
-            ),
-            attributes: ['id', 'name'],
-            include: [
-                {
-                    model: Provincia,
-                },
-            ],
-            order: [['name', 'ASC']],
-        });
-
-        res.status(200).json(items);
-    }
-
-    if (name && provinciaId) {
-        const items = await Municipio.findAll({
-            where: Sequelize.where(
-                Sequelize.fn(
-                    'unaccent',
-                    Sequelize.fn('lower', Sequelize.col('Municipio.name')),
-                ),
-                'like',
-                `%${name.toLowerCase()}%`,
-            ),
-            attributes: ['id', 'name'],
-            include: [
-                {
-                    model: Provincia,
-                },
-            ],
-            order: [['name', 'ASC']],
-        });
-
-        res.status(200).json(
-            items.filter((item) => item.Provincium.id === provinciaId),
+    if (filters.name) {
+        filtersList.name = Sequelize.where(
+            Sequelize.fn('lower', Sequelize.col('Municipio.name')),
+            'like',
+            `%${filters.name.toLowerCase()}%`,
         );
+    }
+
+    if (filters.provinciaId) {
+        filtersList.provinciaId = filters.provinciaId;
+    }
+
+    return filtersList;
+};
+
+const getAll = async (filters) => {
+    // if ((await Municipio.count()) === 0) {
+    //     await load();
+    // }
+
+    try {
+        const items = await Municipio.findAll({
+            where: getFiltersList(filters),
+            include: ['provincia'],
+        });
+
+        return items;
+    } catch (error) {
+        // throw new Error('Se produjo un problema al obtener los datos');
+        throw new Error(error.message);
     }
 };
 
-const getOneById = async (req, res) => {
-    const { id } = req.params;
+const getOneById = async (id) => {
+    // if ((await Municipio.count()) === 0) await load();
 
-    if (Number.isNaN(id))
-        return res
-            .status(500)
-            .json({ message: 'Debe ingresar in Número como Id' });
+    try {
+        const item = await Municipio.findByPk(id);
 
-    if ((await Municipio.count()) === 0) {
-        await load();
+        return item;
+    } catch (error) {
+        throw new Error('Se producjo un problema al obtener los datos');
     }
-
-    const item = await Municipio.findByPk(id, {
-        attributes: ['id', 'name'],
-        include: [
-            {
-                model: Provincia,
-            },
-        ],
-        order: [['name', 'ASC']],
-    });
-
-    if (!item)
-        return res
-            .status(404)
-            .json({ message: 'No se encontro un municipio con el Id' });
-
-    return res.status(200).json(item);
 };
 
 module.exports = {

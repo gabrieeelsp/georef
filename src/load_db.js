@@ -4,6 +4,8 @@ const dataProvincias = require('../json/provincias.json');
 const dataMunicipios = require('../json/municipios.json');
 
 const load = async () => {
+    await Municipio.destroy({ truncate: { cascade: true } });
+    await Provincia.destroy({ truncate: { cascade: true } });
     await Provincia.bulkCreate(
         dataProvincias.provincias.map((item) => {
             return { id: Number(item.id), name: item.nombre };
@@ -15,7 +17,7 @@ const load = async () => {
             return {
                 id: Number(item.id),
                 name: item.nombre,
-                ProvinciumId: Number(item.provincia.id),
+                provinciaId: Number(item.provincia.id),
             };
         }),
     );
