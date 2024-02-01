@@ -1,10 +1,13 @@
 const { Router } = require('express');
-const { getAll, getOneById } = require('../controllers/municipioController');
+const {
+    getAllHandler,
+    getOneByIdHandler,
+} = require('../handlers/municipioHandler');
 
 const municipioRouter = Router();
 
-municipioRouter.get('/', (req, res) => getAll(req, res));
+municipioRouter.get('/', getAllHandler);
 
-municipioRouter.get('/:id', (req, res) => getOneById(req, res));
+municipioRouter.get('/:id', getOneByIdHandler);
 
 module.exports = municipioRouter;
